@@ -24,7 +24,7 @@ function　init (){
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
             console.log( Math.round(percentComplete, 2) + '% downloaded' );
-            prg.value = percentComplete ;
+            // prg.value = percentComplete ;
             if (percentComplete == 100) {
                 document.getElementById("loadprg").remove();
             }
