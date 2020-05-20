@@ -17,12 +17,17 @@ function　init (){
 
     Radius = 500;       // カメラの半径;
     scene = new THREE.Scene();      // 表示させるための大元、すべてのデータをこれに入れ込んでいく。
+    var prg = document.getElementById("loadprg");
 
     // obj mtl を読み込んでいる時の処理
     var onProgress = function ( xhr ) {
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
             console.log( Math.round(percentComplete, 2) + '% downloaded' );
+            prg.value = percentComplete ;
+            if (percentComplete == 100) {
+                document.getElementById("loadprg").remove();
+            }
             }
     };
 

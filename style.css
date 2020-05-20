@@ -1,0 +1,9 @@
+progress#loadprg {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    opacity: 50%;
+    border: none;
+    background-color: blue;
+}
