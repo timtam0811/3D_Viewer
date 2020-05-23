@@ -37,11 +37,21 @@ function　init (){
     // obj mtlの読み込み
     // var ObjLoader = new THREE.OBJLoader();
     var ObjLoader = new THREE.FBXLoader();
+    const meshList = [];
     ObjLoader.load("OS-11_Final_Assy.fbx",  function (object){
+        console.table(meshList);
         objmodel = object.clone();
         objmodel.scale.set(0.4, 0.4, 0.4);            // 縮尺の初期化
         objmodel.rotation.set(-1*Math.PI/2, 0, 0);         // 角度の初期化
         objmodel.position.set(0, 0, -100);         // 位置の初期化
+        objmodel.traverse(function(child){
+            if(child.isMesh){
+                child.material = new THREE.MeshLambertMaterial(
+                   {color : child.material.color} 
+                );
+                meshList.push(child);
+            }
+        });
 
     // objをObject3Dで包む
         obj = new THREE.Object3D();
@@ -109,15 +119,50 @@ function　init (){
     });
 
     // 画面表示
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({antialius : true, alpha : true});
     renderer.setSize(window.innerWidth, window.innerHeight);        // 画面の大きさを設定
-    renderer.setClearColor(0xeeeeee, 1);    
+    renderer.setClearColor(0x000000, 0.5);    
     renderer.shadowMapEnabled = true;       
     // html の container というid に追加
     document.getElementById('container').appendChild(renderer.domElement);
 
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.screenSpacePanning = true;
+
+    // マウス座標管理用のベクトルを作成
+    var mouse = new THREE.Vector2();
+    var raycaster = new THREE.Raycaster();
+
+    renderer.domElement.addEventListener('mousemove', handleMouseMove);
+    // マウスを動かしたときのイベント
+    function handleMouseMove(event) {
+        const element = event.currentTarget;
+        // canvas要素上のXY座標
+        const x = event.clientX - element.offsetLeft;
+        const y = event.clientY - element.offsetTop;
+        // canvas要素の幅・高さ
+        const w = element.offsetWidth;
+        const h = element.offsetHeight;
+
+        // -1〜+1の範囲で現在のマウス座標を登録する
+        mouse.x = (x / w) * 2 - 1;
+        mouse.y = -(y / h) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(meshList);
+        meshList.map(mesh => {
+            // 交差しているオブジェクトが1つ以上存在し、
+            // 交差しているオブジェクトの1番目(最前面)のものだったら
+            var orgcolor = mesh.material.color;
+            if (intersects.length > 0 && mesh === intersects[0].object) {
+            // 色を赤くする
+            mesh.material.color.setHex(0xff0000);
+            } else {
+            // それ以外は元の色にする
+            mesh.material.color.setHex(0x888888);
+            }
+        });
+    }
 }   
 
 // 値を変更させる処理
