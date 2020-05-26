@@ -13,3 +13,10 @@ progress#loadprg {
     height : 5%;
     vertical-align: middle;
 }
+
+#cl_container{
+    position: absolute;
+    margin:3em;
+    right:0;
+    top:0;
+}
