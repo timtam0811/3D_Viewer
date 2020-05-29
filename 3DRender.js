@@ -5,7 +5,12 @@ var scene,      // レンダリングするオブジェクトを入れる
     light,      // 太陽光のような光源のオブジェクト
     ambient,    // 自然光のような光源のオブジェクト
     axis,       // 補助線のオブジェクト
-    renderer;   // 画面表示するためのオブジェクト
+    renderer,   // 画面表示するためのオブジェクト
+    raycaster,
+    meshList,
+    org_meshList,
+    org_matList,
+    picker_color;
 
 init();
 animate();
@@ -18,6 +23,7 @@ function　init (){
     Radius = 500;       // カメラの半径;
     scene = new THREE.Scene();      // 表示させるための大元、すべてのデータをこれに入れ込んでいく。
     var prg = document.getElementById("loadprg");
+    
 
     // obj mtl を読み込んでいる時の処理
     var onProgress = function ( xhr ) {
@@ -37,9 +43,11 @@ function　init (){
     // obj mtlの読み込み
     // var ObjLoader = new THREE.OBJLoader();
     var ObjLoader = new THREE.FBXLoader();
-    const meshList = [];
+    meshList = [];
+    org_meshList = [];
+    org_matList=[];
     ObjLoader.load("OS-11_Final_Assy.fbx",  function (object){
-        console.table(meshList);
+        // console.table(meshList);
         objmodel = object.clone();
         objmodel.scale.set(0.4, 0.4, 0.4);            // 縮尺の初期化
         objmodel.rotation.set(-1*Math.PI/2, 0, 0);         // 角度の初期化
@@ -50,6 +58,10 @@ function　init (){
                    {color : child.material.color} 
                 );
                 meshList.push(child);
+                org_meshList.push(child);
+                org_matList.push(new THREE.MeshLambertMaterial(
+                    {color : child.material.color} 
+                 ));
             }
         });
 
@@ -115,7 +127,7 @@ function　init (){
         text = new THREE.Mesh( geometry, matLite );
         text.position.y = - 100;
         text.rotation.x = -Math.PI/2;
-        scene.add( text );
+        // scene.add( text );
     });
 
     // 画面表示
@@ -131,7 +143,7 @@ function　init (){
 
     // マウス座標管理用のベクトルを作成
     var mouse = new THREE.Vector2();
-    var raycaster = new THREE.Raycaster();
+    raycaster = new THREE.Raycaster();
 
     renderer.domElement.addEventListener('mousemove', handleMouseMove);
     // マウスを動かしたときのイベント
@@ -150,18 +162,68 @@ function　init (){
 
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(meshList);
+        // const intersects = getMouseIntersects(event);
         meshList.map(mesh => {
             // 交差しているオブジェクトが1つ以上存在し、
             // 交差しているオブジェクトの1番目(最前面)のものだったら
-            var orgcolor = mesh.material.color;
             if (intersects.length > 0 && mesh === intersects[0].object) {
             // 色を赤くする
             mesh.material.color.setHex(0xff0000);
             } else {
             // それ以外は元の色にする
-            mesh.material.color.setHex(0x888888);
+            var index = getOriginalMesh(mesh);
+            var org_mesh = org_meshList[index];
+            org_color=org_matList[index].color;
+            mesh.material.color.setRGB(org_color.r,org_color.g,org_color.b);
             }
         });
+    }
+
+    picker_color = convertHexFormat(document.getElementById("cl_1").value);
+    renderer.domElement.addEventListener('dblclick', handleMouseClick);
+
+    function handleMouseClick(event){
+        const element = event.currentTarget;
+        // canvas要素上のXY座標
+        const x = event.clientX - element.offsetLeft;
+        const y = event.clientY - element.offsetTop;
+        // canvas要素の幅・高さ
+        const w = element.offsetWidth;
+        const h = element.offsetHeight;
+
+        // -1〜+1の範囲で現在のマウス座標を登録する
+        mouse.x = (x / w) * 2 - 1;
+        mouse.y = -(y / h) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(meshList);
+        // const intersects = getMouseIntersects(event);
+        meshList.map(mesh => {
+            if (intersects.length > 0 && mesh === intersects[0].object) {
+            picker_color = convertHexFormat(document.getElementById("cl_1").value);
+            var index = getOriginalMesh(mesh);
+            // mesh.material.color.setHex(picker_color);
+            org_matList[index].color.setHex(picker_color);
+            }
+        });
+    }
+
+    function getMouseIntersects(event){
+        const element = event.currentTarget;
+        // canvas要素上のXY座標
+        const x = event.clientX - element.offsetLeft;
+        const y = event.clientY - element.offsetTop;
+        // canvas要素の幅・高さ
+        const w = element.offsetWidth;
+        const h = element.offsetHeight;
+
+        // -1〜+1の範囲で現在のマウス座標を登録する
+        mouse.x = (x / w) * 2 - 1;
+        mouse.y = -(y / h) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(meshList);
+        return intersects;
     }
 }   
 
@@ -176,4 +238,21 @@ function animate() {
 
 function render() {
     renderer.render(scene, camera); // 再描画
+}
+
+function getOriginalMesh(mesh){
+    var index;
+    // org_meshList.map(buf=>{
+    //     if(buf===mesh){
+    //         index = org_meshList.indexOf(buf);
+    //         return index;
+    //     }
+    // });
+    index = meshList.indexOf(mesh);
+    return index;
+}
+
+function convertHexFormat(string){
+    //#rrggbb -> 0xrrggbb
+    return string.replace("#","0x");
 }

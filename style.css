@@ -16,7 +16,22 @@ progress#loadprg {
 
 #cl_container{
     position: absolute;
-    margin:3em;
-    right:0;
+    /* display: block; */
+    margin:auto;
+    width:15%;
+    height:10%;
+    right:5%;
+    top:5%;
+    background-color:#0000009c;
+}
+
+.colorpicker{
+    position:absolute;
+    margin:auto;
+    width:90%;
+    height:40%;
     top:0;
+    bottom: 0;
+    left:0;
+    right: 0;
 }
