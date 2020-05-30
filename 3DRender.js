@@ -54,13 +54,15 @@ function　init (){
         objmodel.position.set(0, 0, -100);         // 位置の初期化
         objmodel.traverse(function(child){
             if(child.isMesh){
-                child.material = new THREE.MeshLambertMaterial(
-                   {color : child.material.color} 
+                // child.material = new THREE.MeshLambertMaterial(
+                child.material = new THREE.MeshStandardMaterial(
+                   {color : child.material.color, roughness:0.4} 
                 );
                 meshList.push(child);
                 org_meshList.push(child);
-                org_matList.push(new THREE.MeshLambertMaterial(
-                    {color : child.material.color} 
+                // org_matList.push(new THREE.MeshLambertMaterial(
+                org_matList.push(new THREE.MeshStandardMaterial(
+                    {color : child.material.color, roughness:0.4} 
                  ));
             }
         });
@@ -79,17 +81,19 @@ function　init (){
     // scene.add( sphere );
 
     //light
-    light1 = new THREE.DirectionalLight(0xdedede, 0.8);
+    light1 = new THREE.DirectionalLight(0xffeebb, 0.8);
     light1.position.set(0, 100, 100);
     light1.castShadow = true;
-    scene.add(light1);
+    // scene.add(light1);
 
-    light2 = new THREE.DirectionalLight(0xdedede, 0.5);
-    light2.position.set(0, 100, -100);
+    // light2 = new THREE.DirectionalLight(0xdedede, 0.5);
+    light2 = new THREE.SpotLight(0xffffff,1, 1000, Math.PI/2, 1, 0.7);
+    light2.position.set(0, 300, -50);
     light2.castShadow = true;
     scene.add(light2);
 
-    ambient = new THREE.AmbientLight(0xc4c4c4,0.5);
+    // ambient = new THREE.AmbientLight(0xededed,0.7);
+    ambient = new THREE.HemisphereLight(0xffffff,0xaaaaaa,0.5);
     scene.add(ambient);
 
     //camera
@@ -131,9 +135,9 @@ function　init (){
     });
 
     // 画面表示
-    renderer = new THREE.WebGLRenderer({antialius : true, alpha : true});
+    renderer = new THREE.WebGLRenderer({antialias : true, alpha : true});
     renderer.setSize(window.innerWidth, window.innerHeight);        // 画面の大きさを設定
-    renderer.setClearColor(0x000000, 0.5);    
+    renderer.setClearColor(0x000000, 0.7);    
     renderer.shadowMapEnabled = true;       
     // html の container というid に追加
     document.getElementById('container').appendChild(renderer.domElement);
@@ -144,6 +148,7 @@ function　init (){
     // マウス座標管理用のベクトルを作成
     var mouse = new THREE.Vector2();
     raycaster = new THREE.Raycaster();
+    picker_color = convertHexFormat(document.getElementById("cl_1").value);
 
     renderer.domElement.addEventListener('mousemove', handleMouseMove);
     // マウスを動かしたときのイベント
@@ -168,7 +173,9 @@ function　init (){
             // 交差しているオブジェクトの1番目(最前面)のものだったら
             if (intersects.length > 0 && mesh === intersects[0].object) {
             // 色を赤くする
-            mesh.material.color.setHex(0xff0000);
+            // mesh.material.color.setHex(0xff0000);
+            picker_color = convertHexFormat(document.getElementById("cl_1").value);
+            mesh.material.color.setHex(picker_color);
             } else {
             // それ以外は元の色にする
             var index = getOriginalMesh(mesh);
@@ -179,7 +186,6 @@ function　init (){
         });
     }
 
-    picker_color = convertHexFormat(document.getElementById("cl_1").value);
     renderer.domElement.addEventListener('dblclick', handleMouseClick);
 
     function handleMouseClick(event){
