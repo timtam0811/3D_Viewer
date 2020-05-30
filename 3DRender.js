@@ -232,15 +232,30 @@ function　init (){
     }
 
     document.getElementById("RandomizeBodyColor").onclick=function(){
-        // console.log("clicked");
-        var targetIndex = [29, 30, 31, 34, 35];
-        var rnd_color=getRandomHex();
+        var targetIndex = [29, 30, 31, 34, 35];//Index of 'meshList' array representing guitar's body
+        var rnd_color=getRandomHex();//returns object including hex string, r, g, b(0~1)
+        var target={r : rnd_color.r, g : rnd_color.g, b : rnd_color.b};
         targetIndex.map(index=>{
-            org_matList[index].color.setHex(rnd_color); 
+            // org_matList[index].color.setHex(rnd_color.str);  //change color immediately
+            
+            ////Animated color change
+            var test = {r:org_matList[index].color.r, 
+                        g:org_matList[index].color.g,
+                        b:org_matList[index].color.b};
+            var tween = new createjs.Tween.get(test)
+                .to({r:target.r, g:target.g, b:target.b},800,createjs.Ease.cubicOut)
+                .addEventListener("change",function(){
+                org_matList[index].color.r = test.r;
+                org_matList[index].color.g = test.g;
+                org_matList[index].color.b = test.b;
+                meshList[index].material.color.r = test.r;
+                meshList[index].material.color.g = test.g;
+                meshList[index].material.color.b = test.b;
+                });
+                
         });
-        console.log("random color set;%s",rnd_color);
-        document.getElementById("cl_1").value=rnd_color.replace("0x","#");
-        renderer.domElement.dispatchEvent(new Event('mousemove'));
+        console.log("random color set;%s",rnd_color.str);
+        document.getElementById("cl_1").value=rnd_color.str.replace("0x","#");
     }
 
     function getMouseIntersects(event){
@@ -269,6 +284,7 @@ function animate() {
                                         // メモリの消費を抑えることができる。
     // cameramove();   // カメラ移動
     render();       // 再描画処理
+    // TWEEN.update();
 }
 
 function render() {
@@ -293,5 +309,10 @@ function convertHexFormat(string){
 }
 
 function getRandomHex(){
-    return '0x'+ ("000000"+Math.floor(Math.random()*16777215).toString(16)).slice(-6);
+    var ret = {str : "",r:0,g:0,b:0};
+    ret.str = '0x'+ ("000000"+Math.floor(Math.random()*16777215).toString(16)).slice(-6);
+    ret.r = parseInt(ret.str.slice(2,4),16)/256;
+    ret.g = parseInt(ret.str.slice(4,6),16)/256;
+    ret.b = parseInt(ret.str.slice(6),16)/256;
+    return ret;
 }
