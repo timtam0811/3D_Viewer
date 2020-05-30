@@ -142,6 +142,22 @@ function　init (){
     // html の container というid に追加
     document.getElementById('container').appendChild(renderer.domElement);
 
+    window.addEventListener('resize', onResize);
+
+    function onResize() {
+    // サイズを取得
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // レンダラーのサイズを調整する
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(width, height);
+
+    // カメラのアスペクト比を正す
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    }
+
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.screenSpacePanning = true;
 
@@ -210,8 +226,21 @@ function　init (){
             var index = getOriginalMesh(mesh);
             // mesh.material.color.setHex(picker_color);
             org_matList[index].color.setHex(picker_color);
+            console.log("color changed; mesh index : %i",index);
             }
         });
+    }
+
+    document.getElementById("RandomizeBodyColor").onclick=function(){
+        // console.log("clicked");
+        var targetIndex = [29, 30, 31, 34, 35];
+        var rnd_color=getRandomHex();
+        targetIndex.map(index=>{
+            org_matList[index].color.setHex(rnd_color); 
+        });
+        console.log("random color set;%s",rnd_color);
+        document.getElementById("cl_1").value=rnd_color.replace("0x","#");
+        renderer.domElement.dispatchEvent(new Event('mousemove'));
     }
 
     function getMouseIntersects(event){
@@ -261,4 +290,8 @@ function getOriginalMesh(mesh){
 function convertHexFormat(string){
     //#rrggbb -> 0xrrggbb
     return string.replace("#","0x");
+}
+
+function getRandomHex(){
+    return '0x'+ ("000000"+Math.floor(Math.random()*16777215).toString(16)).slice(-6);
 }
