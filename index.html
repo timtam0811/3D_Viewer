@@ -5,14 +5,20 @@
         <title>Three.js -OS-11 Color Changer-</title>
         <!-- <link rel="stylesheet" type="text/css" href="styleTest.css" /> -->
         <script type = "text/javascript" src = "lib/three.js"></script>
-        <script type = "text/javascript" src = "lib/three.min.js"></script>
+        <!-- <script type = "text/javascript" src = "lib/three.min.js"></script> -->
+        <!-- <script type = "module" src = "lib/three.module.js"></script> -->
         <link rel = "stylesheet" href = "style.css">
     </head>
     <body>
         <div id="container">
             <progress  max = "100" id = "loadprg"></progress> 
             <div id="cl_container">
-                <input type="color" class="colorpicker" id="cl_1" value="#052b5c" list="recommend">
+                <label for="cl_1" class="cl_label">Primary(Solid) Color</label>
+                <input type="color" class="colorpicker" id="cl_1" value="#e3ad75" list="recommend">
+                <label for="cl_2" class="cl_label">Secondary Color</label>
+                <input type="color" class="colorpicker" id="cl_2" value="#46aa64" list="recommend">
+                <label for="cl_3" class="cl_label">Manual Color</label>
+                <input type="color" class="colorpicker" id="cl_3" value="#222222" list="recommend">
                 <datalist id="recommend">
                     <option value="#083608"></option>
                     <option value="#7a0505"></option>
@@ -21,13 +27,23 @@
                     <option value="#d3ad5a"></option>                    
                 </datalist>
                 <!-- <label for="head">Head</label> -->  
-                <button type="button" id="RandomizeBodyColor" class="rnd">Randomize Body Color</button>      
+                <button type="button" id="RandomizeBodyColor" class="rnd">Randomize Body Color</button>
+                <span id="grad_cnt">  
+                    <button type="button" id="ToggleColorType" class="tgl">Solid/Gradation</button>
+                    <div>
+                        <label for="toggle_vh" class="cl_label" style="font-size: small;display:block;">Vertical Grad.</label>
+                        <input type="checkbox" id="toggle_vh"> 
+                    </div>
+                </span>
             </div>
             <script type = "text/javascript" src = "lib/MTLLoader.js"></script>
             <script type = "text/javascript" src = "lib/OBJLoader.js"></script>
             <script type = "text/javascript" src = "lib/FBXLoader.js"></script>
             <script type = "text/javascript" src = "lib/OrbitControls.js"></script>
+            <script type = "module" src = "lib/SubdivisionModifier.js"></script>
+            <script src = "lib/THREE.DecalGeometry.js"></script>
             <script type = "text/javascript" src = "inflate.min.js"></script>
+            <script type = "text/javascript" src = "GradShader.js"></script>
             <!-- <script type = "text/javascript" src = "lib/Tween.js"></script> -->
             <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
 

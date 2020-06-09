@@ -1,6 +1,9 @@
+// import { SubdivisionModifier } from './lib/SubdivisionModifier.js';
+
 var scene,      // レンダリングするオブジェクトを入れる
     objmodel,   // モデルデータを入れる
     obj,        // モデルデータの角度などを変更するために重ねる
+    decalobj,
     camera,     // カメラのオブジェクト
     light,      // 太陽光のような光源のオブジェクト
     ambient,    // 自然光のような光源のオブジェクト
@@ -10,7 +13,12 @@ var scene,      // レンダリングするオブジェクトを入れる
     meshList,
     org_meshList,
     org_matList,
-    picker_color;
+    picker_color,
+    decalMaterial,
+    decalMeshList,
+    body_grad,
+    solid_bodymatList,
+    isVertGrad;
 
 init();
 animate();
@@ -20,7 +28,12 @@ function　init (){
     var width  = 1000,  // 表示サイズ 横
         height = 600;   // 表示サイズ 縦
 
-    Radius = 500;       // カメラの半径;
+    const faceIndices = ['a','b','c'];
+    body_grad = false;
+    isVertGrad = document.getElementById("toggle_vh").checked;
+    solid_bodymatList = [];
+
+    // Radius = 500;       // カメラの半径;
     scene = new THREE.Scene();      // 表示させるための大元、すべてのデータをこれに入れ込んでいく。
     var prg = document.getElementById("loadprg");
     
@@ -30,7 +43,8 @@ function　init (){
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
             console.log( Math.round(percentComplete, 2) + '% downloaded' );
-            // prg.value = percentComplete ;
+            prg.value = percentComplete ;
+            // prg.style.width = Math.round(percentComplete, 2) + '%';
             if (percentComplete == 100) {
                 document.getElementById("loadprg").remove();
             }
@@ -38,7 +52,7 @@ function　init (){
     };
 
     // obj mtl が読み込めなかったときのエラー処理
-    var onError = function ( xhr ) {    };
+    var onError = function ( xhr ) {  console.log("FBX load failed.")  };
 
     // obj mtlの読み込み
     // var ObjLoader = new THREE.OBJLoader();
@@ -46,61 +60,139 @@ function　init (){
     meshList = [];
     org_meshList = [];
     org_matList=[];
-    ObjLoader.load("OS-11_Final_Assy.fbx",  function (object){
+    const gradTex = createGradTex();
+    decalMaterial = new THREE.MeshPhongMaterial( {  
+        // transparent: true, 
+        // depthTest: true,   
+        // depthWrite: false,   
+        // polygonOffset: true,  
+        // polygonOffsetFactor: -4, 
+        map : gradTex,
+        shininess:70,
+    });
+
+    ObjLoader.load("OS-11_Final_Assy2.fbx",  function (object){
         // console.table(meshList);
         objmodel = object.clone();
         objmodel.scale.set(0.4, 0.4, 0.4);            // 縮尺の初期化
         objmodel.rotation.set(-1*Math.PI/2, 0, 0);         // 角度の初期化
         objmodel.position.set(0, 0, -100);         // 位置の初期化
+
+        decalMeshList = [];
         objmodel.traverse(function(child){
             if(child.isMesh){
-                // child.material = new THREE.MeshLambertMaterial(
-                child.material = new THREE.MeshStandardMaterial(
-                   {color : child.material.color, roughness:0.4} 
-                );
                 meshList.push(child);
                 org_meshList.push(child);
-                // org_matList.push(new THREE.MeshLambertMaterial(
                 org_matList.push(new THREE.MeshStandardMaterial(
-                    {color : child.material.color, roughness:0.4} 
-                 ));
+                    {roughness:0.4, color:child.material.color,
+                     opacity:1, transparent:true
+                     }));
+            }
+        });
+
+        meshList.map((mesh, index)=>{
+            mesh.material = new THREE.MeshStandardMaterial(
+                {roughness:0.4, color:org_matList[index].color,
+                    opacity:1, transparent:true
+                    });
+            if(isBody(index)){
+                solid_bodymatList.push(mesh.material);
+                // mesh.material.opacity = 0;
+                // mesh.material.transparent = true;
+                mesh.geometry.computeBoundingBox();
+                var tempgeom = new THREE.Geometry();
+                var tempmesh = new THREE.Mesh(tempgeom.fromBufferGeometry(mesh.geometry), new THREE.MeshStandardMaterial());
+                tempgeom.computeBoundingBox();
+                var tempbb =  getBoxGeometryFromBoundingBox(tempmesh.geometry.boundingBox);
+                var decalGeometry = new THREE.DecalGeometry(  
+                    tempmesh, // it has to be a THREE.Mesh
+                    tempbb.pos,
+                    new THREE.Vector3(0,0,0), // THREE.Vector3 specifying the orientation of the decal  
+                    tempbb.length, // THREE.Vector3 specifying the size of the decal box  
+                    1 // THREE.Vector3 specifying what sides to clip (1-clip, 0-noclip)  
+                );
+                decalGeometry.scale(4,4,4);
+                decalGeometry.rotateX(-1*Math.PI/2);
+                decalGeometry.translate(0,0,-100);
+                var decalMesh = new THREE.Mesh(decalGeometry,decalMaterial);
+                decalMeshList.push(decalMesh);
+                // decalGeometry.computeBoundingBox();
+                // const bh = new THREE.Box3Helper( decalGeometry.boundingBox, 0xffff00 );
+                // scene.add(bh);
             }
         });
 
     // objをObject3Dで包む
         obj = new THREE.Object3D();
+        decalobj = new THREE.Object3D();
         obj.add(objmodel);
-        scene.add(obj);                     // sceneに追加
+        decalMeshList.map(mesh=>{
+            decalobj.add(mesh);
+        });
+        scene.add(obj);
+        // scene.add(decalobj);
+        // modelFadeIn();                     // sceneに追加
+        lightFadeIn();
     }, onProgress, onError);        // obj mtl データは(.obj, .mtl. 初期処理, 読み込み時の処理, エラー処理)
                                     // と指定する。
 
-    const ballgeom = new THREE.SphereGeometry(10,32,32);
-    const ballmat = new THREE.MeshBasicMaterial( {color: 0x0f00ff} );
+    function modelFadeIn(){
+        meshList.map(mesh=>{
+            // var targetAlpha = 0;
+            var tween = new createjs.Tween.get(mesh.material)
+                .to({opacity:1},2000,createjs.Ease.cubicInOut);
+                // .addEventListener("change",function(){
+                // mesh.material.opacity = targetAlpha;
+                // });
+        });
+    }
+
+    
+
+    const ballgeom = new THREE.SphereGeometry(60,32,32);
+    ballgeom.computeBoundingBox();
+    const ballmat = new THREE.MeshStandardMaterial({color : 0x666666, roughness : 0.4});
     var sphere = new THREE.Mesh(ballgeom, ballmat);
-    sphere.position.set(0,100,100);
     // scene.add( sphere );
+    // const gradTex = createGradTex();
+
+    var decalGeometry = new THREE.DecalGeometry(  
+        sphere, // it has to be a THREE.Mesh
+        sphere.position, // THREE.Vector3 in world coordinates  
+        new THREE.Vector3(Math.PI/2,0,0), // THREE.Vector3 specifying the orientation of the decal  
+        new THREE.Vector3(120,120,120), // THREE.Vector3 specifying the size of the decal box  
+        0 // THREE.Vector3 specifying what sides to clip (1-clip, 0-noclip)  
+    );
+
+    var decalMesh = new THREE.Mesh(decalGeometry,decalMaterial);
+    decalMesh.position.copy(sphere.position);
+    // scene.add(decalMesh);
 
     //light
-    light1 = new THREE.DirectionalLight(0xffeebb, 0.8);
+    const light1 = new THREE.DirectionalLight(0xffeebb, 0.6);
     light1.position.set(0, 100, 100);
     light1.castShadow = true;
     // scene.add(light1);
 
     // light2 = new THREE.DirectionalLight(0xdedede, 0.5);
-    light2 = new THREE.SpotLight(0xffffff,1, 1000, Math.PI/2, 1, 0.7);
+    const light2 = new THREE.SpotLight(0xffffff,0, 1000, Math.PI/2, 1, 0.5);
     light2.position.set(0, 300, -50);
     light2.castShadow = true;
     scene.add(light2);
-
+    
     // ambient = new THREE.AmbientLight(0xededed,0.7);
-    ambient = new THREE.HemisphereLight(0xffffff,0xaaaaaa,0.5);
+    const ambient = new THREE.HemisphereLight(0xffffff,0xaaaaaa,0.5);
     scene.add(ambient);
+    function lightFadeIn(){
+        var tween1 = new createjs.Tween.get(light2)
+                .to({power:Math.PI},2000,createjs.Ease.cubicInOut);
+        var tween2 = new createjs.Tween.get(ambient)
+                .to({power:0.5*Math.PI},2000,createjs.Ease.cubicInOut);
+    };
 
     //camera
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
     camera.position.set(300, 300, 300);
-    //camera.position.x = 0;
-    //camera.position = new THREE.Vectror3(0,0,0); のような書き方もある
 
     // hepler
     axis = new THREE.AxisHelper(2000);  // 補助線を2000px分表示
@@ -184,20 +276,17 @@ function　init (){
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(meshList);
         // const intersects = getMouseIntersects(event);
-        meshList.map(mesh => {
+        meshList.map((mesh,index) => {
             // 交差しているオブジェクトが1つ以上存在し、
             // 交差しているオブジェクトの1番目(最前面)のものだったら
             if (intersects.length > 0 && mesh === intersects[0].object) {
-            // 色を赤くする
-            // mesh.material.color.setHex(0xff0000);
-            picker_color = convertHexFormat(document.getElementById("cl_1").value);
-            mesh.material.color.setHex(picker_color);
-            } else {
-            // それ以外は元の色にする
-            var index = getOriginalMesh(mesh);
-            var org_mesh = org_meshList[index];
-            org_color=org_matList[index].color;
-            mesh.material.color.setRGB(org_color.r,org_color.g,org_color.b);
+                picker_color = convertHexFormat(document.getElementById("cl_3").value);
+                mesh.material.color.setHex(picker_color);
+            }
+            else {
+                // それ以外は元の色にする
+                var org_color=org_matList[index].color;
+                mesh.material.color.setRGB(org_color.r, org_color.g, org_color.b);
             }
         });
     }
@@ -222,7 +311,7 @@ function　init (){
         // const intersects = getMouseIntersects(event);
         meshList.map(mesh => {
             if (intersects.length > 0 && mesh === intersects[0].object) {
-            picker_color = convertHexFormat(document.getElementById("cl_1").value);
+            picker_color = convertHexFormat(document.getElementById("cl_3").value);
             var index = getOriginalMesh(mesh);
             // mesh.material.color.setHex(picker_color);
             org_matList[index].color.setHex(picker_color);
@@ -231,31 +320,65 @@ function　init (){
         });
     }
 
-    document.getElementById("RandomizeBodyColor").onclick=function(){
-        var targetIndex = [29, 30, 31, 34, 35];//Index of 'meshList' array representing guitar's body
-        var rnd_color=getRandomHex();//returns object including hex string, r, g, b(0~1)
-        var target={r : rnd_color.r, g : rnd_color.g, b : rnd_color.b};
+    const cl_inputs = Array.from(document.getElementsByClassName("colorpicker"));
+    cl_inputs.map(el =>{
+        el.addEventListener("input", onColorChange);
+    });
+    
+    function onColorChange(){
+        //Gradation
+        const tex = createGradTex();
+        decalMaterial.map = tex;
+
+        //Solid
+        var targetIndex = [29, 30, 31];//Index of 'meshList' array representing guitar's body
+        const targetcolor = document.getElementById("cl_1").value.replace("#","0x");
         targetIndex.map(index=>{
-            // org_matList[index].color.setHex(rnd_color.str);  //change color immediately
-            
-            ////Animated color change
-            var test = {r:org_matList[index].color.r, 
-                        g:org_matList[index].color.g,
-                        b:org_matList[index].color.b};
-            var tween = new createjs.Tween.get(test)
-                .to({r:target.r, g:target.g, b:target.b},800,createjs.Ease.cubicOut)
-                .addEventListener("change",function(){
-                org_matList[index].color.r = test.r;
-                org_matList[index].color.g = test.g;
-                org_matList[index].color.b = test.b;
-                meshList[index].material.color.r = test.r;
-                meshList[index].material.color.g = test.g;
-                meshList[index].material.color.b = test.b;
-                });
-                
+            org_matList[index].color.setHex(targetcolor);  //change color immediately
         });
-        console.log("random color set;%s",rnd_color.str);
-        document.getElementById("cl_1").value=rnd_color.str.replace("0x","#");
+        renderer.domElement.dispatchEvent(new Event("mousemove"));//Force to update
+    }
+
+    document.getElementById("RandomizeBodyColor").onclick=function(){
+        var targetIndex = [29, 30, 31];//Index of 'meshList' array representing guitar's body
+        var rnd_color=getRandomHex();//returns object including hex string, r, g, b(0~1)
+        var rnd_color2=getRandomHex();//returns object including hex string, r, g, b(0~1)
+
+        document.getElementById("cl_1").value = rnd_color.str.replace("0x","#");
+        document.getElementById("cl_2").value = rnd_color2.str.replace("0x","#");
+        onColorChange();
+        renderer.domElement.dispatchEvent(new Event("mousemove"));//Force to update
+    }
+
+    document.getElementById("ToggleColorType").onclick=function(){
+        if(body_grad){
+            //Solid Color
+            body_grad = false;
+            // decalMeshList.map(mesh=>{
+                scene.remove(decalobj);
+            // });
+            solid_bodymatList.map(material=>{
+                material.opacity = 1;
+                material.transparent = false;
+            });
+            onColorChange();
+        }
+        else{
+            //Gradation
+            body_grad = true;
+            scene.add(decalobj);
+            onColorChange();
+            solid_bodymatList.map(material=>{
+                material.opacity = 0;
+                material.transparent = true;
+            });
+        }
+    }
+
+    document.getElementById("toggle_vh").onchange=function(){
+        isVertGrad = document.getElementById("toggle_vh").checked;
+        // createGradTex();
+        onColorChange();
     }
 
     function getMouseIntersects(event){
@@ -275,6 +398,7 @@ function　init (){
         const intersects = raycaster.intersectObjects(meshList);
         return intersects;
     }
+
 }   
 
 // 値を変更させる処理
@@ -315,4 +439,50 @@ function getRandomHex(){
     ret.g = parseInt(ret.str.slice(4,6),16)/256;
     ret.b = parseInt(ret.str.slice(6),16)/256;
     return ret;
+}
+
+function createGradTex(){
+    var canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    var context = canvas.getContext('2d');
+    context.beginPath();
+    var grad;
+    if(isVertGrad){
+      grad = context.createLinearGradient(0, 0, 0, 64);
+    }
+    else{
+        grad = context.createLinearGradient(0, 0, 64, 0);
+    }
+     
+    var cv_1 = document.getElementById("cl_1").value;
+    var cv_2 = document.getElementById("cl_2").value;
+    grad.addColorStop(0.15,cv_1);
+    grad.addColorStop(1,cv_2);
+    context.fillStyle = grad;
+    context.rect(0, 0, 64, 64);
+    context.fill();
+    // geometry = new THREE.PlaneGeometry(70, 70, 8, 8);
+    texture = new THREE.CanvasTexture(canvas,THREE.UVMapping);
+    return texture;
+}
+
+function isBody(index){
+    var ret = false;
+    if(index == 29 || index==30 || index ==31){
+        ret = true;
+    }
+    return ret;
+}
+
+function getBoxGeometryFromBoundingBox(bb){
+    var ret={pos:new THREE.Vector3(0.0, 0.0, 0.0),
+             length : new THREE.Vector3(0.0, 0.0, 0.0)};
+    ret.pos.addVectors(bb.max, bb.min);
+    ret.pos.divideScalar(2.0);
+    
+    ret.length.subVectors(bb.max, bb.min);
+
+    return ret;
+
 }

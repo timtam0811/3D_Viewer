@@ -4,7 +4,7 @@ body{
     background-size: cover;
     margin:0;
 }
-progress#loadprg {
+#loadprg {
     position: absolute;
     left: 0;
     top: 50%;
@@ -21,10 +21,10 @@ progress#loadprg {
     flex-direction: column;
     align-items: center;
     /* margin:auto; */
-    width:15%;
-    height:20%;
-    right:5%;
-    top:5%;
+    width:20%;
+    height:30%;
+    right:1%;
+    top:1%;
     background-color:#0000009c;
 }
 
@@ -32,7 +32,7 @@ progress#loadprg {
     /* position:absolute; */
     margin:auto;
     width:100%;
-    height:40%;
+    height:30%;
     /* top:0; */
     /* bottom: 0; */
     /* left:0; */
@@ -41,13 +41,48 @@ progress#loadprg {
     border-width: 0px;
 }
 
+.cl_label{
+    font-family: Helvetica, Arial, sans-serif;
+    color:white;
+}
+
 .rnd{
     /* position:absolute; */
-    margin:auto;
-    height:40%;
-    width:100%;
+    margin:5%;
+    height:30%;
+    width:90%;
     font-family: Helvetica, Arial, sans-serif;
-    font-size: x-large;
+    font-size: medium;
+    padding:0.7em;
+    background: rgb(197, 197, 197);
+    /* transition:0.2s; */
+    border:none;
+}
+
+.rnd:hover{
+    background: rgb(247, 189, 0);
+}
+
+
+.tgl{
+    /* position:absolute; */
+    margin:auto;
+    height:70%;
+    /* width:100%; */
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: medium;
+    background:linear-gradient(90deg,rgb(197,197,197),rgb(197, 197, 197));
+    border:none;
+    /* transition: 0.2s; */
+}
+
+.tgl:hover{
+    background:linear-gradient(90deg,rgb(97, 169, 236),rgb(30, 83, 184));
+}
+
+#grad_cnt{
+    display:flex;
+    width:100%;
 }
 
 #container{
