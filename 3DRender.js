@@ -320,10 +320,13 @@ function　init (){
         });
     }
 
-    const cl_inputs = Array.from(document.getElementsByClassName("colorpicker"));
-    cl_inputs.map(el =>{
-        el.addEventListener("input", onColorChange);
-    });
+    // const cl_inputs = Array.from(document.getElementsByClassName("colorpicker"));
+    // cl_inputs.map(el =>{
+    //     el.addEventListener("input", onColorChange);
+    // });
+
+    document.getElementById("cl_1").addEventListener("input",onColorChange);
+    document.getElementById("cl_2").addEventListener("input",onColorChange);
     
     function onColorChange(){
         //Gradation
