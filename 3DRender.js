@@ -489,3 +489,16 @@ function getBoxGeometryFromBoundingBox(bb){
     return ret;
 
 }
+
+function toggleUI(){
+    const el=document.getElementById("cl_container");
+    const el2=document.getElementById("showUI");
+    if(el.classList.contains("hidden")){
+        el.classList.remove("hidden");
+        el2.classList.remove("shown");
+    }
+    else{
+        el.classList.add("hidden");
+        el2.classList.add("shown");
+    }
+}

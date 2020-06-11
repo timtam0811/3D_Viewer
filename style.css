@@ -15,6 +15,21 @@ body{
     vertical-align: middle;
 }
 
+#showUI{
+    position:absolute;
+    right:1%;
+    top:1%;
+    visibility: hidden;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size:small;
+    color:#ffffff;
+    /* transition:0.2s; */
+}
+
+#showUI.shown{
+    visibility: visible;
+}
+
 #cl_container{
     position: absolute;
     display: flex;
@@ -22,17 +37,23 @@ body{
     align-items: center;
     /* margin:auto; */
     width:20%;
-    height:30%;
+    /* height:30%; */
     right:1%;
     top:1%;
     background-color:#0000009c;
+    /* transition:0.2s; */
+}
+
+#cl_container.hidden{
+    height:0%;
+    visibility: hidden;
 }
 
 .colorpicker{
     /* position:absolute; */
     margin:auto;
     width:100%;
-    height:15%;
+    /* height:15%; */
     /* top:0; */
     /* bottom: 0; */
     /* left:0; */
@@ -87,4 +108,11 @@ body{
 
 #container{
     cursor:crosshair;
+}
+
+.UIin-out{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size:small;
+    color:#ffffff;
+
 }
