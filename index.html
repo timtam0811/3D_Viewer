@@ -13,6 +13,7 @@
     <body>
         <div id="container">
             <progress  max = "100" id = "loadprg"></progress> 
+            <div id="showUI" class="" onclick="toggleUI()">Show UI</div>
             <div id="cl_container">
                 <label for="cl_1" class="cl_label">Primary(Solid) Color</label>
                 <input type="color" class="colorpicker" id="cl_1" value="#e3ad75" list="recommend">
@@ -36,6 +37,7 @@
                         <input type="checkbox" id="toggle_vh"> 
                     </div>
                 </span>
+                <div id="toggleUI" class="UIin-out" onclick="toggleUI()">Hide UI</div>
             </div>
             <div id="preset_select">
                 <div id="up_arrow">
