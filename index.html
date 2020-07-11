@@ -8,6 +8,7 @@
         <!-- <script type = "text/javascript" src = "lib/three.min.js"></script> -->
         <!-- <script type = "module" src = "lib/three.module.js"></script> -->
         <link rel = "stylesheet" href = "style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     </head>
     <body>
         <div id="container">
@@ -16,7 +17,7 @@
                 <label for="cl_1" class="cl_label">Primary(Solid) Color</label>
                 <input type="color" class="colorpicker" id="cl_1" value="#e3ad75" list="recommend">
                 <label for="cl_2" class="cl_label">Secondary Color</label>
-                <input type="color" class="colorpicker" id="cl_2" value="#46aa64" list="recommend">
+                <input type="color" class="colorpicker" id="cl_2" value="#924302" list="recommend">
                 <label for="cl_3" class="cl_label">Manual Color</label>
                 <input type="color" class="colorpicker" id="cl_3" value="#222222" list="recommend">
                 <datalist id="recommend">
@@ -36,6 +37,24 @@
                     </div>
                 </span>
             </div>
+            <div id="preset_select">
+                <div id="up_arrow">
+                    <span class="material-icons" style="color:white">keyboard_arrow_up</span>
+                    <span id="preset_select_title">Color Preset</span>
+                    <span class="material-icons" style="color:white">keyboard_arrow_up</span>
+                </div>
+                <div id="preset_item_list">
+                    <span class="preset_item neck" style="background-color: #EAB686;">Neck : Maple</span>
+                    <span class="preset_item neck fb" style="background-color: #AA6B41;">Neck : Roasted Maple</span>
+                    <span class="preset_item fb" style="background-color: #EAB686;">FB : Maple</span>
+                    <span class="preset_item fb" style="background-color: #493623;">FB : Rosewood</span>
+                    <span class="preset_item metal" style="background-color: #928C77;">Metal Parts : Nickel</span>
+                    <span class="preset_item metal" style="background-color: #B5B7BA;">Metal Parts : Chrome</span>
+                    <span class="preset_item metal" style="background-color: #A59D45;">Metal Parts : Gold</span>
+                    <span class="preset_item pos" style="background-color: #000000; color:white;">Position : Black</span>
+                    <span class="preset_item pos" style="background-color: #efefef;">Position : White</span>
+                </div>
+            </div>
             <script type = "text/javascript" src = "lib/MTLLoader.js"></script>
             <script type = "text/javascript" src = "lib/OBJLoader.js"></script>
             <script type = "text/javascript" src = "lib/FBXLoader.js"></script>
@@ -46,8 +65,8 @@
             <script type = "text/javascript" src = "GradShader.js"></script>
             <!-- <script type = "text/javascript" src = "lib/Tween.js"></script> -->
             <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
-
-            <script src = "3DRender.js"></script>
+            <!-- <script type="module" src = "preset_apply.js"></script> -->
+            <script type="module"  src = "3DRender.js"></script>
         </div>
         
     </body>

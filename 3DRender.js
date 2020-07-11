@@ -1,4 +1,5 @@
 // import { SubdivisionModifier } from './lib/SubdivisionModifier.js';
+import Preset_Indices from "./preset_apply.js"
 
 var scene,      // レンダリングするオブジェクトを入れる
     objmodel,   // モデルデータを入れる
@@ -24,16 +25,12 @@ init();
 animate();
 
 function　init (){
-
-    var width  = 1000,  // 表示サイズ 横
-        height = 600;   // 表示サイズ 縦
-
+    console.log(Preset_Indices.meshIndices);
     const faceIndices = ['a','b','c'];
     body_grad = false;
     isVertGrad = document.getElementById("toggle_vh").checked;
     solid_bodymatList = [];
 
-    // Radius = 500;       // カメラの半径;
     scene = new THREE.Scene();      // 表示させるための大元、すべてのデータをこれに入れ込んでいく。
     var prg = document.getElementById("loadprg");
     
@@ -97,8 +94,6 @@ function　init (){
                     });
             if(isBody(index)){
                 solid_bodymatList.push(mesh.material);
-                // mesh.material.opacity = 0;
-                // mesh.material.transparent = true;
                 mesh.geometry.computeBoundingBox();
                 var tempgeom = new THREE.Geometry();
                 var tempmesh = new THREE.Mesh(tempgeom.fromBufferGeometry(mesh.geometry), new THREE.MeshStandardMaterial());
@@ -116,9 +111,6 @@ function　init (){
                 decalGeometry.translate(0,0,-100);
                 var decalMesh = new THREE.Mesh(decalGeometry,decalMaterial);
                 decalMeshList.push(decalMesh);
-                // decalGeometry.computeBoundingBox();
-                // const bh = new THREE.Box3Helper( decalGeometry.boundingBox, 0xffff00 );
-                // scene.add(bh);
             }
         });
 
@@ -130,49 +122,9 @@ function　init (){
             decalobj.add(mesh);
         });
         scene.add(obj);
-        // scene.add(decalobj);
-        // modelFadeIn();                     // sceneに追加
         lightFadeIn();
     }, onProgress, onError);        // obj mtl データは(.obj, .mtl. 初期処理, 読み込み時の処理, エラー処理)
                                     // と指定する。
-
-    function modelFadeIn(){
-        meshList.map(mesh=>{
-            // var targetAlpha = 0;
-            var tween = new createjs.Tween.get(mesh.material)
-                .to({opacity:1},2000,createjs.Ease.cubicInOut);
-                // .addEventListener("change",function(){
-                // mesh.material.opacity = targetAlpha;
-                // });
-        });
-    }
-
-    
-
-    const ballgeom = new THREE.SphereGeometry(60,32,32);
-    ballgeom.computeBoundingBox();
-    const ballmat = new THREE.MeshStandardMaterial({color : 0x666666, roughness : 0.4});
-    var sphere = new THREE.Mesh(ballgeom, ballmat);
-    // scene.add( sphere );
-    // const gradTex = createGradTex();
-
-    var decalGeometry = new THREE.DecalGeometry(  
-        sphere, // it has to be a THREE.Mesh
-        sphere.position, // THREE.Vector3 in world coordinates  
-        new THREE.Vector3(Math.PI/2,0,0), // THREE.Vector3 specifying the orientation of the decal  
-        new THREE.Vector3(120,120,120), // THREE.Vector3 specifying the size of the decal box  
-        0 // THREE.Vector3 specifying what sides to clip (1-clip, 0-noclip)  
-    );
-
-    var decalMesh = new THREE.Mesh(decalGeometry,decalMaterial);
-    decalMesh.position.copy(sphere.position);
-    // scene.add(decalMesh);
-
-    //light
-    const light1 = new THREE.DirectionalLight(0xffeebb, 0.6);
-    light1.position.set(0, 100, 100);
-    light1.castShadow = true;
-    // scene.add(light1);
 
     // light2 = new THREE.DirectionalLight(0xdedede, 0.5);
     const light2 = new THREE.SpotLight(0xffffff,0, 1000, Math.PI/2, 1, 0.5);
@@ -320,11 +272,6 @@ function　init (){
         });
     }
 
-    // const cl_inputs = Array.from(document.getElementsByClassName("colorpicker"));
-    // cl_inputs.map(el =>{
-    //     el.addEventListener("input", onColorChange);
-    // });
-
     document.getElementById("cl_1").addEventListener("input",onColorChange);
     document.getElementById("cl_2").addEventListener("input",onColorChange);
     
@@ -383,6 +330,11 @@ function　init (){
         // createGradTex();
         onColorChange();
     }
+
+    var preset_list = Array.from(document.getElementsByClassName("preset_item"));
+    preset_list.map(el=>{
+        el.addEventListener("click",SetPresetColor);
+    });
 
     function getMouseIntersects(event){
         const element = event.currentTarget;
@@ -466,7 +418,7 @@ function createGradTex(){
     context.rect(0, 0, 64, 64);
     context.fill();
     // geometry = new THREE.PlaneGeometry(70, 70, 8, 8);
-    texture = new THREE.CanvasTexture(canvas,THREE.UVMapping);
+    const texture = new THREE.CanvasTexture(canvas,THREE.UVMapping);
     return texture;
 }
 
@@ -488,4 +440,21 @@ function getBoxGeometryFromBoundingBox(bb){
 
     return ret;
 
+}
+
+function SetPresetColor(el){
+    // console.log(el);
+    const cl=Array.from(el.target.classList);
+    // const RGBstr = el.target.style.backgroundColor.match(/\d+/g);
+    const RGBstr = el.target.style.backgroundColor
+    cl.map(c=>{
+        if(Preset_Indices.meshIndices[c]){
+            // console.log(Preset_Indices.meshIndices[c]);
+            Preset_Indices.meshIndices[c].map(index=>{
+                // org_matList[index].color.setHex(picker_color);
+                org_matList[index].color.set(RGBstr);
+            });
+        }
+    });
+    renderer.domElement.dispatchEvent(new Event("mousemove"));//Force to update
 }
