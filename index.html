@@ -30,14 +30,20 @@
                 </datalist>
                 <!-- <label for="head">Head</label> -->  
                 <button type="button" id="RandomizeBodyColor" class="rnd">Randomize Body Color</button>
-                <span id="grad_cnt">  
-                    <button type="button" id="ToggleColorType" class="tgl">Solid/Gradation</button>
-                    <div>
-                        <label for="toggle_vh" class="cl_label" style="font-size: small;display:block;">Vertical Grad.</label>
-                        <input type="checkbox" id="toggle_vh"> 
-                    </div>
-                </span>
-                <div id="toggleUI" class="UIin-out" onclick="toggleUI()">Hide UI</div>
+                <!-- <button type="button" id="ToggleColorType" class="tgl">Solid/Gradation</button> -->
+                <!-- <div id="grad_cnt">   -->
+                <div class="slide_container" id="toggle_vh_container">
+                    <label for="toggle_sg" class="cl_label" style="margin-right: 15px;">Solid/Gradation</label>
+                    <input type="checkbox" class="hidden_check" id="toggle_sg"> 
+                    <label for="toggle_sg" class="toggle_slider" id="toggle_sg_label"></label>
+                </div>
+                <div class="slide_container" id="toggle_vh_container">
+                    <label for="toggle_vh" class="cl_label" style="margin-right: 15px;">Vertical Grad.</label>
+                    <input type="checkbox" class="hidden_check" id="toggle_vh"> 
+                    <label for="toggle_vh" class="toggle_slider" id="toggle_vh_label"></label>
+                </div>
+                <!-- </div> -->
+                <div id="hideUI" class="UIin-out" onclick="toggleUI()">Hide UI</div>
             </div>
             <div id="preset_select">
                 <div id="up_arrow">
@@ -47,7 +53,7 @@
                 </div>
                 <div id="preset_item_list">
                     <span class="preset_item neck" style="background-color: #EAB686;">Neck : Maple</span>
-                    <span class="preset_item neck fb" style="background-color: #AA6B41;">Neck : Roasted Maple</span>
+                    <span class="preset_item neck fb" style="background-color: #AA6B41;">Neck/FB : Roasted Maple</span>
                     <span class="preset_item fb" style="background-color: #EAB686;">FB : Maple</span>
                     <span class="preset_item fb" style="background-color: #493623;">FB : Rosewood</span>
                     <span class="preset_item metal" style="background-color: #928C77;">Metal Parts : Nickel</span>
@@ -69,6 +75,18 @@
             <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
             <!-- <script type="module" src = "preset_apply.js"></script> -->
             <script type="module"  src = "3DRender.js"></script>
+            <script type="text/javascript">
+                function toggleUI(){
+                    if(document.getElementById("showUI").classList.contains("shown")){
+                        document.getElementById("showUI").classList.remove("shown");
+                        document.getElementById("cl_container").classList.remove("hidden");
+                    }
+                    else{
+                        document.getElementById("showUI").classList.add("shown");
+                        document.getElementById("cl_container").classList.add("hidden");
+                    }
+                }
+            </script>
         </div>
         
     </body>

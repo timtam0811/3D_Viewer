@@ -300,8 +300,10 @@ function　init (){
         renderer.domElement.dispatchEvent(new Event("mousemove"));//Force to update
     }
 
-    document.getElementById("ToggleColorType").onclick=function(){
-        if(body_grad){
+    // document.getElementById("ToggleColorType").onclick=function(){
+    document.getElementById("toggle_vh_container").onclick=function(){
+        // if(body_grad){
+        if(!document.getElementById("toggle_sg").checked){
             //Solid Color
             body_grad = false;
             // decalMeshList.map(mesh=>{
@@ -458,3 +460,14 @@ function SetPresetColor(el){
     });
     renderer.domElement.dispatchEvent(new Event("mousemove"));//Force to update
 }
+
+// function toggleUI(){
+//     if(document.getElementById("showUI").classList.include("shown")){
+//         document.getElementById("showUI").classList.remove("shown");
+//         document.getElementById("cl_container").classList.remove("hidden");
+//     }
+//     else{
+//         document.getElementById("showUI").classList.add("shown");
+//         document.getElementById("cl_container").classList.add("hidden");
+//     }
+// }

@@ -29,6 +29,15 @@ body{
 
 #showUI.shown{
     visibility: visible;
+    background-color: black;
+}
+
+#hideUI{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size:small;
+    color:#ffffff;
+    margin:3%;
+    background-color: black;
 }
 
 #cl_container{
@@ -61,6 +70,7 @@ body{
     /* right: 0; */
     padding: 0px 0px;
     border-width: 0px;
+    border-radius: 5px;
 }
 
 .cl_label{
@@ -78,7 +88,9 @@ body{
     padding:0.7em;
     background: rgb(197, 197, 197);
     transition:0.15s;
+    transition-property: transform,box-shadow;
     border:none;
+    border-radius: 5px;
 }
 
 .rnd:hover{
@@ -94,11 +106,13 @@ body{
     margin:auto;
     height:70%;
     /* width:100%; */
+    padding: 0.5em;
     font-family: Helvetica, Arial, sans-serif;
     font-size: medium;
     background:linear-gradient(90deg,rgb(197,197,197),rgb(197, 197, 197));
     border:none;
     transition: 0.15s;
+    transition-property: transform,box-shadow;
 }
 
 .tgl:hover{
@@ -153,6 +167,9 @@ body{
     margin:2%;
     padding:2%;
     transition: 0.15s;
+    border-radius:10px;
+    flex-basis: 200px;
+    flex-shrink: 0;
 }
 
 .preset_item:hover{
@@ -161,4 +178,64 @@ body{
     /* border-bottom: 2px solid #666; */
     /* border-right: 2px solid #666; */
     box-shadow: 5px 5px #333;
+}
+
+/* #toggle_vh_container{ */
+.slide_container{
+    width : 80%;
+    height:50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* #toggle_vh{ */
+.hidden_check{
+    display:none;
+}
+
+/* #toggle_vh_label{ */
+.toggle_slider{
+    font-size: small;
+    display:block;
+    width:80px;
+    flex-basis:80px;
+    flex-shrink: 0;
+    height: 30px;
+    position: relative;
+    cursor: pointer;
+    border-radius: 30px;
+    background: linear-gradient(#121823, #161d2b);
+    box-shadow:
+        inset 0 3px 8px 1px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(0, 0, 0, 0.5),
+        0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* #toggle_vh:checked ~ #toggle_vh_label{ */
+.hidden_check:checked ~ .toggle_slider{
+    background: linear-gradient(#76c4f1,#4198ca)
+}
+
+/* #toggle_vh_label::after { */
+.toggle_slider::after{
+    content: "";
+    height: 29px;
+    width: 29px;
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    border-radius: inherit;
+    background: linear-gradient(#36455b, #283446);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 8px rgba(0, 0, 0, 0.3),
+        0 12px 12px rgba(0, 0, 0, 0.4);
+    transition:0.15s;
+    transition-property: left, background-color;
+}
+
+/* #toggle_vh:checked ~ #toggle_vh_label::after { */
+.hidden_check:checked ~ .toggle_slider::after{
+    left:63%;
 }
